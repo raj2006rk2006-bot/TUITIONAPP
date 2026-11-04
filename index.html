@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TUITIONAPP — Tuition Management</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#182238;--muted:#6d7890;--brand:#4f46e5;--line:#e7eaf2;--green:#0f9d70;--red:#dc4545}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+header{background:#171d35;color:white;padding:17px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:5}
+header b{font-size:21px;letter-spacing:.4px}header small{color:#c6cbe0}
+.wrap{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 62px)}
+nav{background:#202846;padding:18px 12px;color:white}nav button{display:block;width:100%;text-align:left;padding:12px;border:0;background:transparent;color:#dce2f6;border-radius:9px;margin:3px 0;cursor:pointer;font-size:14px}nav button.active,nav button:hover{background:#39466e;color:#fff}
+main{padding:24px;max-width:1400px;width:100%;margin:auto}.page{display:none}.page.active{display:block}
+h1{font-size:25px;margin:0 0 5px}h2{font-size:17px;margin:0 0 13px}.sub{color:var(--muted);margin:0 0 20px}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin:18px 0}.card,.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:17px;box-shadow:0 3px 12px #1d2c4c08}
+.metric{font-size:27px;font-weight:750;margin-top:5px}.muted{color:var(--muted);font-size:13px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+form.rowform{display:flex;flex-wrap:wrap;gap:9px;margin:10px 0 17px}input,select,textarea{padding:10px 11px;border:1px solid #d9deea;border-radius:8px;background:white;color:var(--ink);font:inherit;min-width:125px}input[type=date]{min-width:145px}button,.btn{border:0;border-radius:8px;padding:10px 13px;background:var(--brand);color:white;cursor:pointer;font-weight:600}button.secondary{background:#e9ecf8;color:#293455}button.green{background:var(--green)}button.red{background:var(--red)}button:disabled{opacity:.5;cursor:not-allowed}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:11px 9px;border-bottom:1px solid var(--line);vertical-align:middle}th{color:#68738b;font-size:12px;text-transform:uppercase;letter-spacing:.3px}.tablewrap{overflow:auto}.tag{padding:4px 8px;border-radius:30px;font-size:12px;background:#eef0f7}.tag.ok{background:#e2f7ee;color:#087b55}.tag.late{background:#ffeded;color:#b52f2f}
+.actions{display:flex;gap:6px;flex-wrap:wrap}.bar{height:8px;background:#edf0f7;border-radius:20px;overflow:hidden}.bar i{display:block;height:100%;background:#4f46e5}.notice{background:#fff8e8;border:1px solid #f2dfac;padding:12px;border-radius:10px;color:#705514;font-size:13px;margin:12px 0}
+label{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4px}.empty{padding:25px;text-align:center;color:var(--muted)}
+@media(max-width:850px){.wrap{grid-template-columns:1fr}nav{display:flex;overflow:auto;padding:8px;position:sticky;top:60px;z-index:4}nav button{white-space:nowrap;width:auto;margin:0 3px;padding:10px}main{padding:15px}.cards{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+@media(max-width:460px){header{padding:13px}header small{display:none}.cards{gap:8px}.card{padding:12px}.metric{font-size:22px}input,select{flex:1;min-width:120px}}
+</style>
+</head>
+<body>
+<header><div><b>📘 TUITIONAPP</b><br><small>Tuition Management System</small></div><small id="today"></small></header>
+<div class="wrap">
+<nav id="nav">
+<button class="active" data-page="dashboard">▦ Owner Dashboard</button>
+<button data-page="students">♙ Students & Batches</button>
+<button data-page="fees">₹ Fees Pending</button>
+<button data-page="attendance">✓ Attendance</button>
+<button data-page="tests">★ Weekly Test Report</button>
+<button data-page="parent">⌂ Parent App Preview</button>
+<button data-page="enquiries">＋ Refer & Enquiries</button>
+<button data-page="settings">⚙ Settings</button>
+</nav>
+<main>
+<section class="page active" id="dashboard">
+<h1>Owner Dashboard</h1><p class="sub">नमस्ते! आपके tuition का आज का overview.</p>
+<div class="cards">
+<div class="card"><div class="muted">इस महीने फीस मिली</div><div class="metric" id="paidMetric">₹0</div></div>
+<div class="card"><div class="muted">फीस बाकी</div><div class="metric" id="pendingMetric">₹0</div></div>
+<div class="card"><div class="muted">कुल विद्यार्थी</div><div class="metric" id="studentMetric">0</div></div>
+<div class="card"><div class="muted">नई enquiries</div><div class="metric" id="enquiryMetric">0</div></div>
+</div>
+<div class="grid2">
+<div class="panel"><h2>Fees Summary</h2><div id="feeSummary" class="muted">अभी कोई फीस रिकॉर्ड नहीं है।</div></div>
+<div class="panel"><h2>Quick Actions</h2><div class="actions"><button onclick="show('students')">+ विद्यार्थी जोड़ें</button><button onclick="show('attendance')">आज की हाजिरी</button><button onclick="show('fees')">फीस दर्ज करें</button></div><p class="muted">WhatsApp reminder भेजने के लिए संबंधित स्क्रीन पर Reminder बटन दबाएँ।</p></div>
+</div>
+</section>
+
+<section class="page" id="students">
+<h1>Students & Batches</h1><p class="sub">विद्यार्थी, कक्षा, बैच और अभिभावक का WhatsApp नंबर सेव करें।</p>
+<form class="rowform" id="studentForm">
+<input id="sname" placeholder="विद्यार्थी का नाम" required><input id="sclass" placeholder="कक्षा (जैसे 8)" required><input id="sbatch" placeholder="बैच (जैसे शाम 4 बजे)"><input id="sphone" placeholder="Parent WhatsApp: 91..." required>
+<button>+ Add Student</button>
+</form>
+<div class="panel tablewrap"><table><thead><tr><th>नाम</th><th>कक्षा</th><th>बैच</th><th>Parent WhatsApp</th><th>Action</th></tr></thead><tbody id="studentRows"></tbody></table></div>
+</section>
+
+<section class="page" id="fees">
+<h1>Fees Pending</h1><p class="sub">फीस रिकॉर्ड, बकाया और WhatsApp reminder.</p>
+<form class="rowform" id="feeForm">
+<select id="feeStudent" required><option value="">विद्यार्थी चुनें</option></select><input id="feeMonth" type="month" required><input id="feeAmount" type="number" min="1" placeholder="Amount ₹" required><input id="feeDue" type="date" required><button>+ Fee Due जोड़ें</button>
+</form>
+<div class="actions" style="margin-bottom:12px"><button class="secondary" onclick="remindAll()">📲 सभी pending को WhatsApp reminder</button></div>
+<div class="panel tablewrap"><table><thead><tr><th>विद्यार्थी</th><th>महीना</th><th>रकम</th><th>Due date</th><th>Status</th><th>Action</th></tr></thead><tbody id="feeRows"></tbody></table></div>
+</section>
+
+<section class="page" id="attendance">
+<h1>Attendance</h1><p class="sub">P = Present, A = Absent. Absent पर parent alert भेजें।</p>
+<form class="rowform" id="attendanceForm">
+<input id="attDate" type="date" required><select id="attBatch"><option value="">सभी बैच</option></select><button>Load Students</button>
+</form><div id="attendanceList" class="panel"><div class="empty">तारीख और बैच चुनकर Load Students दबाएँ।</div></div>
+</section>
+
+<section class="page" id="tests">
+<h1>Weekly Test Report</h1><p class="sub">Marks, rank और progress parents के WhatsApp पर भेजें।</p>
+<form class="rowform" id="testForm">
+<select id="testStudent" required><option value="">विद्यार्थी चुनें</option></select><input id="testName" placeholder="Test / Subject" required><input id="testMarks" type="number" min="0" placeholder="Marks" required><input id="testOutOf" type="number" min="1" placeholder="Out of" value="100" required><input id="testRank" type="number" min="1" placeholder="Rank"><input id="testDate" type="date" required><button>Save Test</button>
+</form>
+<div class="panel tablewrap"><table><thead><tr><th>विद्यार्थी</th><th>Test</th><th>Marks</th><th>Rank</th><th>Progress</th><th>Action</th></tr></thead><tbody id="testRows"></tbody></table></div>
+</section>
+
+<section class="page" id="parent">
+<h1>Parent App Preview</h1><p class="sub">अभिभावक के लिए विद्यार्थी की attendance, homework, fees और payment summary.</p>
+<div class="notice">यह अभी demo preview है। Parent login और online UPI verification चालू करने के लिए सुरक्षित backend/payment gateway जोड़ना होगा।</div>
+<form class="rowform" id="parentForm"><select id="parentStudent"><option value="">विद्यार्थी चुनें</option></select><button>View Parent Summary</button></form>
+<div id="parentSummary" class="panel"><div class="empty">विद्यार्थी चुनें।</div></div>
+</section>
+
+<section class="page" id="enquiries">
+<h1>Refer & Enquiries</h1><p class="sub">नए admission enquiries और किसने refer किया, उसका रिकॉर्ड।</p>
+<form class="rowform" id="enquiryForm"><input id="eName" placeholder="बच्चे / Parent का नाम" required><input id="ePhone" placeholder="WhatsApp नंबर"><input id="eClass" placeholder="कक्षा"><input id="eRefer" placeholder="किसने refer किया?"><button>+ Add Enquiry</button></form>
+<div class="panel tablewrap"><table><thead><tr><th>नाम</th><th>कक्षा</th><th>WhatsApp</th><th>Referred by</th><th>Action</th></tr></thead><tbody id="enquiryRows"></tbody></table></div>
+</section>
+
+<section class="page" id="settings">
+<h1>Settings</h1><p class="sub">Tuition details और UPI payment configuration.</p>
+<div class="panel">
+<form id="settingsForm" class="rowform">
+<label>Tuition Name<input id="setName" value="TUITIONAPP"></label>
+<label>UPI ID<input id="upiId" placeholder="yourname@upi"></label>
+<label>Payment receiver name<input id="upiName" placeholder="Owner name"></label>
+<label>Default monthly fee (₹)<input id="defaultFee" type="number" min="0" placeholder="1000"></label>
+<button>Save Settings</button>
+</form>
+<p class="muted">UPI ID सेव करने पर parent summary में UPI payment link दिखेगा। Payment अपने bank/UPI app में verify करके ही Paid mark करें।</p>
+</div>
+<div class="panel" style="margin-top:14px"><h2>Data Backup</h2><div class="actions"><button onclick="exportData()">Download Backup JSON</button><label class="btn secondary">Restore Backup<input type="file" accept="application/json" onchange="importData(event)" hidden></label><button class="red" onclick="clearData()">Clear All Data</button></div><p class="muted">इस prototype का data इसी browser/device में local save होता है। नियमित backup डाउनलोड करें।</p></div>
+</section>
+</main></div>
+<script>
+const $=id=>document.getElementById(id), today=new Date().toISOString().slice(0,10);
+let db=JSON.parse(localStorage.getItem('tuitionapp_db')||'{"students":[],"fees":[],"attendance":[],"tests":[],"enquiries":[],"settings":{"name":"TUITIONAPP","upi":"","upiName":"","defaultFee":""}}');
+function save(){localStorage.setItem('tuitionapp_db',JSON.stringify(db));render()}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function money(n){return '₹'+Number(n||0).toLocaleString('en-IN')}
+function student(id){return db.students.find(s=>s.id===id)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function show(p){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===p));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===p));render()}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.page));
+function wa(phone,msg){let n=String(phone||'').replace(/\D/g,'');if(n.length===10)n='91'+n;if(!n){alert('WhatsApp number उपलब्ध नहीं है');return}window.open('https://wa.me/'+n+'?text='+encodeURIComponent(msg),'_blank')}
+function render(){
+$('today').textContent=new Date().toLocaleDateString('hi-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+$('studentMetric').textContent=db.students.length;$('enquiryMetric').textContent=db.enquiries.length;
+let paid=db.fees.filter(f=>f.status==='Paid').reduce((a,f)=>a+Number(f.amount),0),pending=db.fees.filter(f=>f.status!=='Paid').reduce((a,f)=>a+Number(f.amount),0);
+$('paidMetric').textContent=money(paid);$('pendingMetric').textContent=money(pending);
+$('feeSummary').innerHTML=`<p>कुल फीस रिकॉर्ड: <b>${db.fees.length}</b></p><p>Paid: <b>${money(paid)}</b> · Pending: <b>${money(pending)}</b></p><div class="bar"><i style="width:${paid+pending?paid/(paid+pending)*100:0}%"></i></div>`;
+const opts='<option value="">विद्यार्थी चुनें</option>'+db.students.map(s=>`<option value="${s.id}">${esc(s.name)} — ${esc(s.className)}</option>`).join('');
+['feeStudent','testStudent','parentStudent'].forEach(id=>$(id).innerHTML=opts);
+$('attBatch').innerHTML='<option value="">सभी बैच</option>'+[...new Set(db.students.map(s=>s.batch).filter(Boolean))].map(b=>`<option>${esc(b)}</option>`).join('');
+$('studentRows').innerHTML=db.students.map(s=>`<tr><td><b>${esc(s.name)}</b></td><td>${esc(s.className)}</td><td>${esc(s.batch)}</td><td>${esc(s.phone)}</td><td><button class="red" onclick="del('students','${s.id}')">Delete</button></td></tr>`).join('')||'<tr><td colspan="5" class="empty">अभी विद्यार्थी नहीं जोड़े गए।</td></tr>';
+$('feeRows').innerHTML=db.fees.map(f=>{let s=student(f.studentId),late=f.status!=='Paid'&&f.due<today;return `<tr><td>${esc(s?.name||'Deleted student')}</td><td>${esc(f.month)}</td><td>${money(f.amount)}</td><td>${esc(f.due)}</td><td><span class="tag ${f.status==='Paid'?'ok':late?'late':''}">${f.status==='Paid'?'Paid':late?'Late':'Pending'}</span></td><td><div class="actions">${f.status!=='Paid'?`<button class="green" onclick="markPaid('${f.id}')">Mark Paid</button><button class="secondary" onclick="remind('${f.id}')">WhatsApp</button>`:`<button class="secondary" onclick="receipt('${f.id}')">Receipt</button>`}<button class="red" onclick="del('fees','${f.id}')">×</button></div></td></tr>`}).join('')||'<tr><td colspan="6" class="empty">फीस रिकॉर्ड नहीं है।</td></tr>';
+$('testRows').innerHTML=db.tests.map(t=>{let s=student(t.studentId),pct=Math.min(100,Math.max(0,t.marks/t.outOf*100));return `<tr><td>${esc(s?.name||'—')}</td><td>${esc(t.name)}<br><small>${esc(t.date)}</small></td><td>${t.marks}/${t.outOf}</td><td>${t.rank||'—'}</td><td style="min-width:100px"><div class="bar"><i style="width:${pct}%"></i></div><small>${pct.toFixed(0)}%</small></td><td><button onclick="sendTest('${t.id}')">WhatsApp</button> <button class="red" onclick="del('tests','${t.id}')">×</button></td></tr>`}).join('')||'<tr><td colspan="6" class="empty">Test report नहीं है।</td></tr>';
+$('enquiryRows').innerHTML=db.enquiries.map(e=>`<tr><td>${esc(e.name)}</td><td>${esc(e.className)}</td><td>${esc(e.phone)}</td><td>${esc(e.refer)}</td><td><button class="red" onclick="del('enquiries','${e.id}')">Delete</button></td></tr>`).join('')||'<tr><td colspan="5" class="empty">कोई enquiry नहीं।</td></tr>';
+$('setName').value=db.settings.name||'TUITIONAPP';$('upiId').value=db.settings.upi||'';$('upiName').value=db.settings.upiName||'';$('defaultFee').value=db.settings.defaultFee||'';
+}
+function del(type,id){if(confirm('क्या आप यह record delete करना चाहते हैं?')){db[type]=db[type].filter(x=>x.id!==id);save()}}
+$('studentForm').onsubmit=e=>{e.preventDefault();db.students.push({id:uid(),name:$('sname').value.trim(),className:$('sclass').value.trim(),batch:$('sbatch').value.trim(),phone:$('sphone').value.trim()});e.target.reset();save()};
+$('feeForm').onsubmit=e=>{e.preventDefault();db.fees.push({id:uid(),studentId:$('feeStudent').value,month:$('feeMonth').value,amount:+$('feeAmount').value,due:$('feeDue').value,status:'Pending'});e.target.reset();save()};
+function markPaid(id){let f=db.fees.find(x=>x.id===id);if(!f)return;if(confirm('क्या payment receive हो गया है? Confirm करने पर receipt बनेगी.')){f.status='Paid';f.paidAt=new Date().toISOString();save();receipt(id)}}
+function receipt(id){let f=db.fees.find(x=>x.id===id),s=student(f?.studentId);if(!f)return;let msg=`${db.settings.name||'TUITIONAPP'}\\nFEE RECEIPT\\nReceipt No: ${f.id}\\nStudent: ${s?.name||''}\\nMonth: ${f.month}\\nAmount: ${money(f.amount)}\\nStatus: PAID\\nDate: ${new Date(f.paidAt||Date.now()).toLocaleDateString('en-IN')}\\nThank you!`;let w=window.open('','_blank');w.document.write('<pre style="font:16px Arial;white-space:pre-wrap;padding:30px">'+esc(msg)+'</pre><button onclick="window.print()">Print / Save PDF</button>')}
+function remind(id){let f=db.fees.find(x=>x.id===id),s=student(f?.studentId);if(f&&s)wa(s.phone,`नमस्ते, ${s.name} की ${f.month} महीने की फीस ${money(f.amount)} बाकी है। कृपया ${f.due} तक जमा करें। धन्यवाद — ${db.settings.name}`)}
+function remindAll(){let fs=db.fees.filter(f=>f.status!=='Paid');if(!fs.length){alert('कोई pending fees नहीं है।');return}let i=0;function next(){if(i>=fs.length)return;let f=fs[i++],s=student(f.studentId);if(s)wa(s.phone,`नमस्ते, ${s.name} की ${f.month} महीने की फीस ${money(f.amount)} बाकी है। कृपया जमा करें। — ${db.settings.name}`);if(i<fs.length&&confirm('अगले parent को WhatsApp reminder खोलें?'))next()}next()}
+$('attendanceForm').onsubmit=e=>{e.preventDefault();let date=$('attDate').value,batch=$('attBatch').value,arr=db.students.filter(s=>!batch||s.batch===batch);$('attendanceList').innerHTML=arr.length?`<div class="tablewrap"><table><thead><tr><th>विद्यार्थी</th><th>Attendance</th><th>Alert</th></tr></thead><tbody>${arr.map(s=>{let a=db.attendance.find(x=>x.studentId===s.id&&x.date===date);return `<tr><td>${esc(s.name)}</td><td><select id="a_${s.id}"><option value="P" ${a?.status!=='A'?'selected':''}>P — Present</option><option value="A" ${a?.status==='A'?'selected':''}>A — Absent</option></select></td><td><button class="secondary" onclick="saveAttendance('${s.id}','${date}')">Save</button></td></tr>`}).join('')}</tbody></table></div><button style="margin-top:12px" onclick="saveAllAttendance('${date}',${JSON.stringify(arr.map(s=>s.id)).replace(/"/g,'&quot;')})">Save All Attendance</button>`:'<div class="empty">इस batch में विद्यार्थी नहीं हैं।</div>'};
+function saveAttendance(sid,date){let st=$('a_'+sid).value,a=db.attendance.find(x=>x.studentId===sid&&x.date===date);if(a)a.status=st;else db.attendance.push({id:uid(),studentId:sid,date,status:st});save();if(st==='A'&&confirm('Absent alert WhatsApp पर भेजें?')){let s=student(sid);wa(s.phone,`नमस्ते, आज ${date} को ${s.name} tuition में अनुपस्थित रहे। कृपया ध्यान दें। — ${db.settings.name}`)}}
+function saveAllAttendance(date,ids){ids.forEach(id=>{let st=$('a_'+id).value,a=db.attendance.find(x=>x.studentId===id&&x.date===date);if(a)a.status=st;else db.attendance.push({id:uid(),studentId:id,date,status:st})});save();alert('Attendance saved. Absent parents को alert भेजने के लिए individual Save/WhatsApp करें।')}
+$('testForm').onsubmit=e=>{e.preventDefault();db.tests.push({id:uid(),studentId:$('testStudent').value,name:$('testName').value,marks:+$('testMarks').value,outOf:+$('testOutOf').value,rank:$('testRank').value,date:$('testDate').value});e.target.reset();$('testOutOf').value=100;save()};
+function sendTest(id){let t=db.tests.find(x=>x.id===id),s=student(t?.studentId);if(t&&s)wa(s.phone,`Weekly Test Report\\nStudent: ${s.name}\\nTest: ${t.name}\\nMarks: ${t.marks}/${t.outOf}\\nRank: ${t.rank||'Not assigned'}\\nProgress: ${(t.marks/t.outOf*100).toFixed(1)}%\\n— ${db.settings.name}`)}
+$('parentForm').onsubmit=e=>{e.preventDefault();let s=student($('parentStudent').value);if(!s)return;let fees=db.fees.filter(f=>f.studentId===s.id),atts=db.attendance.filter(a=>a.studentId===s.id).sort((a,b)=>b.date.localeCompare(a.date)),tests=db.tests.filter(t=>t.studentId===s.id).sort((a,b)=>b.date.localeCompare(a.date));let due=fees.filter(f=>f.status!=='Paid').reduce((a,f)=>a+f.amount,0),upi=db.settings.upi?`upi://pay?pa=${encodeURIComponent(db.settings.upi)}&pn=${encodeURIComponent(db.settings.upiName||db.settings.name)}&am=${due}&cu=INR`:'';$('parentSummary').innerHTML=`<h2>${esc(s.name)} · Class ${esc(s.className)}</h2><p>Batch: ${esc(s.batch)}</p><h2>Attendance</h2><p>Present: ${atts.filter(a=>a.status==='P').length} · Absent: ${atts.filter(a=>a.status==='A').length}</p><h2>Fees</h2><p>Pending: <b>${money(due)}</b></p>${fees.map(f=>`<p>${esc(f.month)} — ${money(f.amount)} — ${f.status}</p>`).join('')} ${upi?`<a href="${upi}" class="btn">Pay by UPI</a>`:'<p class="muted">UPI ID Settings में जोड़ें।</p>'}<h2 style="margin-top:18px">Recent Tests</h2>${tests.slice(0,5).map(t=>`<p>${esc(t.name)}: ${t.marks}/${t.outOf} · Rank ${t.rank||'—'}</p>`).join('')||'<p class="muted">कोई test नहीं।</p>'}<h2>Homework</h2><p class="muted">Homework feature अगले backend-enabled version में जोड़ा जाएगा।</p>`};
+$('enquiryForm').onsubmit=e=>{e.preventDefault();db.enquiries.push({id:uid(),name:$('eName').value,className:$('eClass').value,phone:$('ePhone').value,refer:$('eRefer').value});e.target.reset();save()};
+$('settingsForm').onsubmit=e=>{e.preventDefault();db.settings={name:$('setName').value,upi:$('upiId').value,upiName:$('upiName').value,defaultFee:$('defaultFee').value};save();alert('Settings saved')};
+function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='tuitionapp-backup.json';a.click();URL.revokeObjectURL(a.href)}
+function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.students||!x.fees)throw 0;db=x;save();alert('Backup restored')}catch{alert('Invalid backup file')}};r.readAsText(f)}
+function clearData(){if(confirm('सारा data हमेशा के लिए इस browser से हट जाएगा। Continue?')){localStorage.removeItem('tuitionapp_db');location.reload()}}
+$('attDate').value=today;$('testDate').value=today;render();
+</script>
+</body></html>
