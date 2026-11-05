@@ -3,8 +3,8 @@ const APP_SHELL = [
   "/TUITIONAPP/",
   "/TUITIONAPP/index.html",
   "/TUITIONAPP/manifest.json",
-  "/TUITIONAPP/icons/icon-192.png",
-  "/TUITIONAPP/icons/icon-512.png"
+  "/TUITIONAPP/icon-192.png",
+  "/TUITIONAPP/icons-512.png"
 ];
 
 self.addEventListener("install", (event) => {
