@@ -21,7 +21,10 @@ label{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4
 @media(max-width:850px){.wrap{grid-template-columns:1fr}nav{display:flex;overflow:auto;padding:8px;position:sticky;top:60px;z-index:4}nav button{white-space:nowrap;width:auto;margin:0 3px;padding:10px}main{padding:15px}.cards{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
 @media(max-width:460px){header{padding:13px}header small{display:none}.cards{gap:8px}.card{padding:12px}.metric{font-size:22px}input,select{flex:1;min-width:120px}}
 </style>
-</head>
+<link rel="manifest" href="/TUITIONAPP/manifest.json">
+<meta name="theme-color" content="#171d35">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes"></head>
 <body>
 <header><div><b>📘 TUITIONAPP</b><br><small>Tuition Management System</small></div><small id="today"></small></header>
 <div class="wrap">
@@ -156,5 +159,11 @@ function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'appli
 function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.students||!x.fees)throw 0;db=x;save();alert('Backup restored')}catch{alert('Invalid backup file')}};r.readAsText(f)}
 function clearData(){if(confirm('सारा data हमेशा के लिए इस browser से हट जाएगा। Continue?')){localStorage.removeItem('tuitionapp_db');location.reload()}}
 $('attDate').value=today;$('testDate').value=today;render();
+</script><script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/TUITIONAPP/sw.js");
+  });
+}
 </script>
 </body></html>
